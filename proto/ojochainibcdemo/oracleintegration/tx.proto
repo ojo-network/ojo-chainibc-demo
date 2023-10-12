@@ -1,0 +1,20 @@
+syntax = "proto3";
+package ojochainibcdemo.oracleintegration;
+
+import "ojochainibcdemo/oracleintegration/packet.proto";
+
+option go_package = "github.com/ojo-network/ojo-chainibc-demo/x/oracleintegration/types";
+
+// Msg defines the Msg service.
+service Msg{
+  rpc RequestPrice(MsgRequestPrice) returns (MsgRequestPriceResponse);
+}
+
+message MsgRequestPrice{
+  repeated string symbols=1;
+  PriceRequestType type = 2;
+
+  string from = 3;
+}
+
+message MsgRequestPriceResponse{}

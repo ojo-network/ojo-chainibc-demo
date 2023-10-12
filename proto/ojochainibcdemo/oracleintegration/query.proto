@@ -1,0 +1,53 @@
+syntax = "proto3";
+package ojochainibcdemo.oracleintegration;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "ojochainibcdemo/oracleintegration/params.proto";
+import "ojochainibcdemo/oracleintegration/packet.proto";
+
+option go_package = "github.com/ojo-network/ojo-chainibc-demo/x/oracleintegration/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/ojo-chainibc-demo/oracleintegration/params";
+  }
+
+  rpc Result(QueryResult) returns (QueryResultResponse) {
+    option (google.api.http).get = "/ojo-chainibc-demo/oracleintegration/result/{request_id}";
+  }
+
+  rpc Results(QueryResults) returns (QueryResultsResponse) {
+    option (google.api.http).get = "/ojo-chainibc-demo/oracleintegration/results";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryResult {
+  uint64 request_id = 1;
+}
+
+message QueryResultResponse {
+  // params holds all the parameters of this module.
+  OracleRequestResult result  = 1 [(gogoproto.nullable) = false];;
+}
+
+message QueryResults{
+}
+
+message QueryResultsResponse{
+  repeated OracleRequestResult result = 1 [(gogoproto.nullable) = false];;
+}
+
+

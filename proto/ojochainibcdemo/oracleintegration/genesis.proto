@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package ojochainibcdemo.oracleintegration;
+
+import "gogoproto/gogo.proto";
+import "ojochainibcdemo/oracleintegration/params.proto";
+
+option go_package = "github.com/ojo-network/ojo-chainibc-demo/x/oracleintegration/types";
+
+// GenesisState defines the oracleintegration module's genesis state.
+message GenesisState {
+  Params params  = 1 [(gogoproto.nullable) = false];
+  string port_id = 2;
+}
+

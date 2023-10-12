@@ -1,0 +1,67 @@
+syntax = "proto3";
+package ojochainibcdemo.oracleintegration;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/ojo-network/ojo-chainibc-demo/x/oracleintegration/types";
+
+message OjoOraclePacketData {
+    oneof packet {
+        NoData noData = 1;
+    }
+}
+
+message NoData {
+}
+
+message OracleRequestPacketData {
+    option (gogoproto.equal) = true;
+    string client_id = 1 [(gogoproto.customname) = "ClientID"];
+    bytes calldata = 3;
+}
+
+message OracleResponsePacketData {
+    option (gogoproto.equal) = true;
+    string client_id = 1 [(gogoproto.customname) = "ClientID"];
+    uint64 request_id = 2 [(gogoproto.customname) = "RequestID"];
+    int64 request_time = 3;
+    int64 resolve_time = 4;
+    ResolveStatus resolve_status = 5;
+    bytes result = 6;
+}
+
+enum ResolveStatus {
+    option (gogoproto.goproto_enum_prefix) = false;
+    RESOLVE_STATUS_OPEN_UNSPECIFIED = 0 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_OPEN"];
+    RESOLVE_STATUS_SUCCESS = 1 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_SUCCESS"];
+    RESOLVE_STATUS_FAILURE = 2 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_FAILURE"];
+    RESOLVE_STATUS_EXPIRED = 3 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_EXPIRED"];
+}
+
+message RequestPrice{
+    repeated string denoms = 1;
+    PriceRequestType request= 2;
+}
+
+enum PriceRequestType{
+    option (gogoproto.goproto_enum_prefix) = false;
+    PRICE_REQUEST_RATE = 0 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_RATE"];
+    PRICE_REQUEST_MEDIAN = 1 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_MEDIAN"];
+    PRICE_REQUEST_DEVIATION = 2 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_DEVIATION"];
+}
+
+message OracleRequestResult {
+    repeated OracleData price_data=1 [(gogoproto.nullable) = false];
+}
+
+message OracleData {
+    repeated cosmos.base.v1beta1.DecCoin exchange_rate = 2 [(gogoproto.nullable) = false];
+    repeated uint64 block_num = 3;
+}
+
+message OracleRequestPacketAcknowledgement {
+    option (gogoproto.equal) = true;
+    uint64 request_id = 1 [(gogoproto.customname) = "RequestID"];
+    bytes data = 2;
+}
