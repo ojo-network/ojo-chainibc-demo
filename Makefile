@@ -248,4 +248,8 @@ start:
 	sleep 4
 	./develop.sh
 
-.PHONY: start
+
+start-chain:
+	./scripts/single-node.sh
+
+.PHONY: start start-chain

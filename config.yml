@@ -8,6 +8,11 @@ accounts:
   coins:
   - 10000token
   - 100000000stake
+- name: relayer
+  coins:
+    - 30000000000stake
+  mnemonic: pony glide frown crisp unfold lawn cup loan trial govern usual matrix theory
+    wash fresh address pioneer between meadow visa buffalo keep gallery swear
 client:
   openapi:
     path: docs/static/openapi.yml
@@ -15,7 +20,14 @@ faucet:
   name: bob
   coins:
   - 5token
-  - 100000stake
+  - 100000000stake
 validators:
 - name: alice
   bonded: 100000000stake
+
+genesis:
+  app_state:
+    staking:
+      params:
+        bond_denom: uojo
+  chain_id: integration-demo

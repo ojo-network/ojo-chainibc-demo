@@ -7,7 +7,7 @@ import (
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 
 	"github.com/ojo-network/ojo-chainibc-demo/app"
-	"github.com/ojo-network/ojo-chainibc-demo/cmd/ojo-chainibc-demod/cmd"
+	"github.com/ojo-network/ojo-chainibc-demo/cmd/chainibcdemo/cmd"
 )
 
 func main() {
