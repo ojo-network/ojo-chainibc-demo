@@ -24,6 +24,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 
 var _ types.MsgServer = msgServer{}
 
+// RequestPrice sends out request ibc packet to ojo chain for required denoms and price request type
 func (m msgServer) RequestPrice(goCtx context.Context, request *types.MsgRequestPrice) (*types.MsgRequestPriceResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	requestedSymbols := request.GetRequestedSymbols()

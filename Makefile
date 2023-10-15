@@ -245,4 +245,7 @@ start:
 	${MAKE} build
 	./scripts/single-node.sh
 
+docker-build:
+	@docker build -t chainibcdemo .
+
 .PHONY: start start-chain

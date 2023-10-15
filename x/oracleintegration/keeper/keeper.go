@@ -127,11 +127,11 @@ func (k Keeper) GetRequest(ctx sdk.Context, requestID uint64) (types.RequestPric
 	return priceRequest, err
 }
 
-func (k Keeper) SaveFetchResult(ctx sdk.Context, requestID uint64, fetchResult types.OracleRequestResult) {
+func (k Keeper) SaveResult(ctx sdk.Context, requestID uint64, fetchResult types.OracleRequestResult) {
 	ctx.KVStore(k.storeKey).Set(types.KeyRequestIdResultPrefix(requestID), k.cdc.MustMarshal(&fetchResult))
 }
 
-func (k Keeper) GetFetchResult(ctx sdk.Context, requestID uint64) (types.OracleRequestResult, error) {
+func (k Keeper) GetResult(ctx sdk.Context, requestID uint64) (types.OracleRequestResult, error) {
 	var oracleResult types.OracleRequestResult
 	result := ctx.KVStore(k.storeKey).Get(types.KeyRequestIdResultPrefix(requestID))
 	if len(result) == 0 {
@@ -143,7 +143,7 @@ func (k Keeper) GetFetchResult(ctx sdk.Context, requestID uint64) (types.OracleR
 	return oracleResult, err
 }
 
-func (k Keeper) GetFetchResults(ctx sdk.Context) ([]types.ResultResponse, error) {
+func (k Keeper) GetResults(ctx sdk.Context) ([]types.ResultResponse, error) {
 	var results []types.ResultResponse
 	iterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyRequestIdResult)
 	defer iterator.Close()
@@ -162,7 +162,7 @@ func (k Keeper) GetFetchResults(ctx sdk.Context) ([]types.ResultResponse, error)
 	return results, nil
 }
 
-func (k Keeper) GetFetchRequests(ctx sdk.Context) ([]types.RequestResponse, error) {
+func (k Keeper) GetRequests(ctx sdk.Context) ([]types.RequestResponse, error) {
 	var requests []types.RequestResponse
 	iterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyRequestId)
 	defer iterator.Close()

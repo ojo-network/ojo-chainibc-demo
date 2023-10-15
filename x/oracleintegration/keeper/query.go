@@ -26,7 +26,7 @@ func (k querier) Result(goCtx context.Context, req *types.QueryResult) (*types.Q
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	result, err := k.GetFetchResult(ctx, req.RequestId)
+	result, err := k.GetResult(ctx, req.RequestId)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (k querier) Results(goCtx context.Context, req *types.QueryResults) (*types
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	results, err := k.GetFetchResults(ctx)
+	results, err := k.GetResults(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (k querier) Requests(goCtx context.Context, req *types.QueryRequests) (*typ
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	requests, err := k.GetFetchRequests(ctx)
+	requests, err := k.GetRequests(ctx)
 	if err != nil {
 		return nil, err
 	}

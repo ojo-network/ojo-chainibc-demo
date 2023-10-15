@@ -34,7 +34,7 @@ func (im IBCModule) handleOraclePacket(
 		}
 
 		// save fetch price result
-		im.keeper.SaveFetchResult(ctx, modulePacketData.GetRequestID(), priceResult)
+		im.keeper.SaveResult(ctx, modulePacketData.GetRequestID(), priceResult)
 
 	default:
 		err := sdkerrors.Wrapf(sdkerror.ErrUnknownRequest,
