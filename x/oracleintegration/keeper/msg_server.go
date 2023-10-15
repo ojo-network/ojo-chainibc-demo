@@ -26,7 +26,8 @@ var _ types.MsgServer = msgServer{}
 
 func (m msgServer) RequestPrice(goCtx context.Context, request *types.MsgRequestPrice) (*types.MsgRequestPriceResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	requestedSymbols := request.GetSymbols()
+	requestedSymbols := request.GetRequestedSymbols()
+
 	params := m.GetParams(ctx)
 	channelCap, ok := m.scopedKeeper.GetCapability(ctx, host.ChannelCapabilityPath(types.PortID, params.GetSourceChannel()))
 	if !ok {

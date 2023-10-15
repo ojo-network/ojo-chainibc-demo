@@ -241,15 +241,8 @@ test-app-benchmark-invariants:
 	@go test -mod=readonly $(SIMAPP) -benchmem -bench=BenchmarkFullAppSimulation -run=NOOP \
 	-Enabled=true -NumBlocks=1000 -BlockSize=200 -Period=1 -Commit=true -Seed=57 -v -timeout 24h
 
-# TODO: remove
 start:
 	${MAKE} build
-	./scripts/single-node.sh
-	sleep 4
-	./develop.sh
-
-
-start-chain:
 	./scripts/single-node.sh
 
 .PHONY: start start-chain

@@ -26,9 +26,6 @@ func (im IBCModule) handleOraclePacket(
 	}
 	switch modulePacketData.GetClientID() {
 	case types.FetchPriceClientIDKey:
-		//TODO: remove
-		ctx.Logger().Info("Received oracle packet ", "packet", modulePacketData.String())
-
 		var priceResult types.OracleRequestResult
 		if err := types.ModuleCdc.Unmarshal(modulePacketData.GetResult(), &priceResult); err != nil {
 			ack = channeltypes.NewErrorAcknowledgement(err)
@@ -36,14 +33,11 @@ func (im IBCModule) handleOraclePacket(
 				"cannot unmarshall price result packet")
 		}
 
-		//TODO: remove
-		ctx.Logger().Info("price result oracle packet", "price result", priceResult.String())
-
+		// save fetch price result
 		im.keeper.SaveFetchResult(ctx, modulePacketData.GetRequestID(), priceResult)
-		//TODO: store the data here
 
 	default:
-		err := sdkerrors.Wrapf(sdkerror.ErrJSONUnmarshal,
+		err := sdkerrors.Wrapf(sdkerror.ErrUnknownRequest,
 			"market received packet not found: %s", modulePacketData.GetClientID())
 		ack = channeltypes.NewErrorAcknowledgement(err)
 		return ack, err
@@ -65,13 +59,10 @@ func (im IBCModule) handleOracleAcknowledgment(
 	switch resp := ack.Response.(type) {
 	case *channeltypes.Acknowledgement_Result:
 		var oracleAck types.OracleRequestPacketAcknowledgement
-		err := types.ModuleCdc.UnmarshalJSON(resp.Result, &oracleAck)
+		err := types.ModuleCdc.Unmarshal(resp.Result, &oracleAck)
 		if err != nil {
-			return nil, nil
+			return nil, err
 		}
-
-		//TODO :remove after testing
-		ctx.Logger().Error("processing acknow response packet", "packet", oracleAck.String())
 
 		var requestType protobuftypes.Int32Value
 		err = types.ModuleCdc.UnmarshalLengthPrefixed(oracleAck.GetData(), &requestType)
@@ -79,14 +70,24 @@ func (im IBCModule) handleOracleAcknowledgment(
 			return nil, err
 		}
 
-		im.keeper.SaveRequestID(ctx, oracleAck.RequestID, requestType)
+		var request types.OracleRequestPacketData
+		err = types.ModuleCdc.Unmarshal(modulePacket.GetData(), &request)
+		if err != nil {
+			return nil, err
+		}
+
+		var priceRequest types.RequestPrice
+		err = types.ModuleCdc.Unmarshal(request.GetCalldata(), &priceRequest)
+		if err != nil {
+			return nil, err
+		}
+
+		im.keeper.SaveRequest(ctx, oracleAck.RequestID, priceRequest)
+
 		return &sdk.Result{}, nil
 
-		//TODO: fix after testing
-		//default:
-		//	return nil, sdkerrors.Wrapf(sdkerror.ErrJSONUnmarshal,
-		//		"market acknowledgment packet not found: %s", orac.)
+	default:
+		return nil, sdkerrors.Wrap(sdkerror.ErrUnknownRequest,
+			"market acknowledgment packet not found")
 	}
-
-	return nil, nil
 }

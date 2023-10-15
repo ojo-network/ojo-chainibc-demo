@@ -16,6 +16,14 @@ service Query {
     option (google.api.http).get = "/ojo-chainibc-demo/oracleintegration/params";
   }
 
+  rpc Request(QueryRequest) returns (QueryRequestResponse) {
+    option (google.api.http).get = "/ojo-chainibc-demo/oracleintegration/request/{request_id}";
+  }
+
+  rpc Requests(QueryRequests) returns (QueryRequestsResponse) {
+    option (google.api.http).get = "/ojo-chainibc-demo/oracleintegration/request";
+  }
+
   rpc Result(QueryResult) returns (QueryResultResponse) {
     option (google.api.http).get = "/ojo-chainibc-demo/oracleintegration/result/{request_id}";
   }
@@ -30,7 +38,6 @@ message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
-  // params holds all the parameters of this module.
   Params params = 1 [(gogoproto.nullable) = false];
 }
 
@@ -39,15 +46,40 @@ message QueryResult {
 }
 
 message QueryResultResponse {
+  uint64 request_id = 1;
+  OracleRequestResult result  = 2 [(gogoproto.nullable) = false];;
+}
+
+message QueryRequest {
+  uint64 request_id = 1;
+}
+
+message QueryRequestResponse {
   // params holds all the parameters of this module.
-  OracleRequestResult result  = 1 [(gogoproto.nullable) = false];;
+  uint64 request_id = 1;
+  RequestPrice request  = 2 [(gogoproto.nullable) = false];;
 }
 
 message QueryResults{
 }
 
 message QueryResultsResponse{
-  repeated OracleRequestResult result = 1 [(gogoproto.nullable) = false];;
+  repeated ResultResponse results = 1 [(gogoproto.nullable) = false];
 }
 
+message QueryRequests{
+}
 
+message QueryRequestsResponse{
+  repeated RequestResponse requests = 1 [(gogoproto.nullable) = false];
+}
+
+message RequestResponse{
+  uint64 request_id = 1;
+  RequestPrice request = 2 [(gogoproto.nullable) = false];
+}
+
+message ResultResponse{
+  uint64 request_id = 1;
+  OracleRequestResult result = 2 [(gogoproto.nullable) = false];
+}

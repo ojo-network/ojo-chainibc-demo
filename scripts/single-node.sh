@@ -7,7 +7,7 @@ CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 NODE_BIN="${1:-$CWD/../build/chainibcdemo}"
 
 # These options can be overridden by env
-CHAIN_ID="${CHAIN_ID:-integration-demo}"
+CHAIN_ID="${CHAIN_ID:-chainibcdemo}"
 CHAIN_DIR="${CHAIN_DIR:-$CWD/node-data}"
 DENOM="${DENOM:-ustake}"
 STAKE_DENOM="${STAKE_DENOM:-$DENOM}"
@@ -22,6 +22,11 @@ VAL0_MNEMONIC="copper push brief egg scan entry inform record adjust fossil boss
 
 USER_KEY="user"
 USER_MNEMONIC="pony glide frown crisp unfold lawn cup loan trial govern usual matrix theory wash fresh address pioneer between meadow visa buffalo keep gallery swear"
+
+
+DEV_KEY="dev"
+DEV_MNEMONIC="father world lunar vacant bird rough velvet else arrest spirit chronic object very sunny exist ignore pig genuine sea metal ladder cage more error"
+
 
 NEWLINE=$'\n'
 
@@ -97,13 +102,16 @@ if [[ ! -d "$hdir" ]]; then
   echo "$VAL0_MNEMONIC$NEWLINE"
   yes "$VAL0_MNEMONIC$NEWLINE" | $NODE_BIN $home0 keys add $VAL0_KEY $kbt --recover
   yes "$USER_MNEMONIC$NEWLINE" | $NODE_BIN $home0 keys add $USER_KEY $kbt --recover
+  yes "$DEV_MNEMONIC$NEWLINE" | $NODE_BIN $home0 keys add $DEV_KEY $kbt --recover
 
   echo "--- Adding addresses..."
   $NODE_BIN $home0 keys show $VAL0_KEY -a $kbt
   $NODE_BIN $home0 keys show $VAL0_KEY -a --bech val $kbt
-  $NODE_BIN $home0 keys show $USER_KEY -a $kbt
+  $NODE_BIN $home0 keys show $DEV_KEY -a $kbt
   $NODE_BIN $home0 add-genesis-account $($NODE_BIN $home0 keys show $VAL0_KEY -a $kbt) $coins &>/dev/null
   $NODE_BIN $home0 add-genesis-account $($NODE_BIN $home0 keys show $USER_KEY -a $kbt) $coins_user &>/dev/null
+  $NODE_BIN $home0 add-genesis-account $($NODE_BIN $home0 keys show $DEV_KEY -a $kbt) $coins_user &>/dev/null
+
 
 
   echo "--- Patching genesis..."
@@ -165,7 +173,7 @@ echo
 echo "Command Line Access:"
 echo "  * $NODE_BIN --home $hdir status"
 
-$NODE_BIN $home0 start --api.enable true  --rpc.laddr "tcp://127.0.0.1:26660"  --grpc.address="0.0.0.0:9093" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
+$NODE_BIN $home0 start --grpc.address="0.0.0.0:9093" --p2p.laddr "tcp://0.0.0.0:26659" --rpc.laddr "tcp://127.0.0.1:26660" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
 
 # Adds 1 sec to create the log and makes it easier to debug it on CI
 sleep 1

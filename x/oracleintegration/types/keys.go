@@ -30,17 +30,19 @@ var (
 	// PortKey defines the key to store the port ID in store
 	PortKey            = KeyPrefix("oracleintegration-port-")
 	KeyRequestId       = KeyPrefix("request-id")
-	KeyRequestIdResult = KeyPrefix("request-id-result")
+	KeyRequestIdResult = KeyPrefix("result-id")
 )
 
 func KeyPrefix(p string) []byte {
 	return []byte(p)
 }
 
-func KeyRequestIdPrefix(requestID uint64) []byte {
-	return append(KeyRequestId, sdk.Uint64ToBigEndian(requestID)...)
+func KeyRequestIdPrefix(requestID uint64) (key []byte) {
+	key = append(key, KeyRequestId...)
+	return append(key, sdk.Uint64ToBigEndian(requestID)...)
 }
 
-func KeyRequestIdResultPrefix(requestID uint64) []byte {
-	return append(KeyRequestIdResult, sdk.Uint64ToBigEndian(requestID)...)
+func KeyRequestIdResultPrefix(requestID uint64) (key []byte) {
+	key = append(key, KeyRequestIdResult...)
+	return append(key, sdk.Uint64ToBigEndian(requestID)...)
 }

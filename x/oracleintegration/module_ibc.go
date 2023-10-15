@@ -145,7 +145,7 @@ func (im IBCModule) OnRecvPacket(
 	modulePacket channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
-	var ack channeltypes.Acknowledgement
+	//var ack channeltypes.Acknowledgement
 
 	// handle response data
 	ack, err := im.handleOraclePacket(ctx, modulePacket)
@@ -155,17 +155,19 @@ func (im IBCModule) OnRecvPacket(
 		return ack
 	}
 
-	var modulePacketData types.OjoOraclePacketData
-	if err := modulePacketData.Unmarshal(modulePacket.GetData()); err != nil {
-		return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error()))
-	}
+	//var modulePacketData types.OjoOraclePacketData
+	//if err := modulePacketData.Unmarshal(modulePacket.GetData()); err != nil {
+	//	return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error()))
+	//}
+	//
+	//// Dispatch packet
+	//switch packet := modulePacketData.Packet.(type) {
+	//default:
+	//	err := fmt.Errorf("unrecognized %s packet type: %T", types.ModuleName, packet)
+	//	return channeltypes.NewErrorAcknowledgement(err)
+	//}
 
-	// Dispatch packet
-	switch packet := modulePacketData.Packet.(type) {
-	default:
-		err := fmt.Errorf("unrecognized %s packet type: %T", types.ModuleName, packet)
-		return channeltypes.NewErrorAcknowledgement(err)
-	}
+	return nil
 }
 
 // OnAcknowledgementPacket implements the IBCModule interface
@@ -180,6 +182,8 @@ func (im IBCModule) OnAcknowledgementPacket(
 		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet acknowledgement: %v", err)
 	}
 
+	ctx.Logger().Info("on acknowledgement packet", "ack", ack.String(), "module packet", modulePacket.String())
+	//	//
 	//handle acknowledgement
 	result, err := im.handleOracleAcknowledgment(ctx, ack, modulePacket)
 	if err != nil {
@@ -190,45 +194,10 @@ func (im IBCModule) OnAcknowledgementPacket(
 		return nil
 	}
 
-	var modulePacketData types.OjoOraclePacketData
-	if err := modulePacketData.Unmarshal(modulePacket.GetData()); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error())
-	}
-
-	var eventType string
-
-	// Dispatch packet
-	switch packet := modulePacketData.Packet.(type) {
-	// this line is used by starport scaffolding # ibc/packet/module/ack
-	default:
-		errMsg := fmt.Sprintf("unrecognized %s packet type: %T", types.ModuleName, packet)
-		return sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
-	}
-
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			eventType,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(types.AttributeKeyAck, fmt.Sprintf("%v", ack)),
-		),
-	)
-
-	switch resp := ack.Response.(type) {
-	case *channeltypes.Acknowledgement_Result:
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				eventType,
-				sdk.NewAttribute(types.AttributeKeyAckSuccess, string(resp.Result)),
-			),
-		)
-	case *channeltypes.Acknowledgement_Error:
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				eventType,
-				sdk.NewAttribute(types.AttributeKeyAckError, resp.Error),
-			),
-		)
-	}
+	//var modulePacketData types.OjoOraclePacketData
+	//if err := modulePacketData.Unmarshal(modulePacket.GetData()); err != nil {
+	//	return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error())
+	//}
 
 	return nil
 }

@@ -3,18 +3,16 @@ package keeper
 import (
 	"fmt"
 
+	sdkerrors "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
-
-	protobuftypes "github.com/gogo/protobuf/types"
 
 	"github.com/ojo-network/ojo-chainibc-demo/x/oracleintegration/types"
 )
@@ -113,8 +111,20 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k Keeper) SaveRequestID(ctx sdk.Context, requestID uint64, requestType protobuftypes.Int32Value) {
-	ctx.KVStore(k.storeKey).Set(types.KeyRequestIdPrefix(requestID), k.cdc.MustMarshal(&requestType))
+func (k Keeper) SaveRequest(ctx sdk.Context, requestID uint64, request types.RequestPrice) {
+	ctx.KVStore(k.storeKey).Set(types.KeyRequestIdPrefix(requestID), k.cdc.MustMarshal(&request))
+}
+
+func (k Keeper) GetRequest(ctx sdk.Context, requestID uint64) (types.RequestPrice, error) {
+	var priceRequest types.RequestPrice
+	request := ctx.KVStore(k.storeKey).Get(types.KeyRequestIdPrefix(requestID))
+	if len(request) == 0 {
+		return priceRequest, sdkerrors.Wrapf(types.ErrRequestIdNotFound, "price request for request %d not found", requestID)
+	}
+
+	err := k.cdc.Unmarshal(request, &priceRequest)
+
+	return priceRequest, err
 }
 
 func (k Keeper) SaveFetchResult(ctx sdk.Context, requestID uint64, fetchResult types.OracleRequestResult) {
@@ -123,13 +133,18 @@ func (k Keeper) SaveFetchResult(ctx sdk.Context, requestID uint64, fetchResult t
 
 func (k Keeper) GetFetchResult(ctx sdk.Context, requestID uint64) (types.OracleRequestResult, error) {
 	var oracleResult types.OracleRequestResult
-	err := k.cdc.Unmarshal(ctx.KVStore(k.storeKey).Get(types.KeyRequestIdResultPrefix(requestID)), &oracleResult)
+	result := ctx.KVStore(k.storeKey).Get(types.KeyRequestIdResultPrefix(requestID))
+	if len(result) == 0 {
+		return oracleResult, sdkerrors.Wrapf(types.ErrResultNotFound, "result for request %d not found", requestID)
+	}
+
+	err := k.cdc.Unmarshal(result, &oracleResult)
 
 	return oracleResult, err
 }
 
-func (k Keeper) GetFetchResults(ctx sdk.Context) ([]types.OracleRequestResult, error) {
-	var oracleResults []types.OracleRequestResult
+func (k Keeper) GetFetchResults(ctx sdk.Context) ([]types.ResultResponse, error) {
+	var results []types.ResultResponse
 	iterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyRequestIdResult)
 	defer iterator.Close()
 
@@ -140,8 +155,31 @@ func (k Keeper) GetFetchResults(ctx sdk.Context) ([]types.OracleRequestResult, e
 			return nil, err
 		}
 
-		oracleResults = append(oracleResults, oracleResult)
+		key := iterator.Key()[len(types.KeyRequestIdResult):]
+		results = append(results, types.ResultResponse{RequestId: sdk.BigEndianToUint64(key), Result: oracleResult})
 	}
 
-	return oracleResults, nil
+	return results, nil
+}
+
+func (k Keeper) GetFetchRequests(ctx sdk.Context) ([]types.RequestResponse, error) {
+	var requests []types.RequestResponse
+	iterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyRequestId)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var priceRequest types.RequestPrice
+		err := k.cdc.Unmarshal(iterator.Value(), &priceRequest)
+		if err != nil {
+			return nil, err
+		}
+
+		key := iterator.Key()[len(types.KeyRequestId):]
+		requests = append(requests, types.RequestResponse{
+			RequestId: sdk.BigEndianToUint64(key),
+			Request:   priceRequest,
+		})
+	}
+
+	return requests, nil
 }

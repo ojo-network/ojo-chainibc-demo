@@ -31,6 +31,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		CmdQueryParams(),
 		CmdQueryResult(),
 		CmdQueryResults(),
+		CmdQueryRequest(),
+		CmdQueryRequests(),
 	)
 
 	return cmd
@@ -110,6 +112,65 @@ func CmdQueryResult() *cobra.Command {
 			res, err := queryClient.Result(cmd.Context(), &types.QueryResult{
 				RequestId: id,
 			})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdQueryRequest() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "request [id]",
+		Short: "request id query",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			id, err := strconv.ParseUint(args[0], 10, 64)
+			if err != nil {
+				return err
+			}
+
+			res, err := queryClient.Request(cmd.Context(), &types.QueryRequest{
+				RequestId: id,
+			})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdQueryRequests() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "requests",
+		Short: "requests query",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.Requests(cmd.Context(), &types.QueryRequests{})
 			if err != nil {
 				return err
 			}
